@@ -11,7 +11,7 @@ import { ToastService } from '../core/services/toast.service';
   providedIn: 'root'
 })
 export class BasketService {
-  baseUrl:string="http://localhost:8010/"
+  baseUrl:string="https://every-birds-fix.loca.lt/"
   private basketSource=new BehaviorSubject<Basket|null>(null)
   basketSource$=this.basketSource.asObservable()
 

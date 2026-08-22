@@ -7,7 +7,7 @@ import { IOrder } from './order.model';
   providedIn: 'root'
 })
 export class OrdersService {
-  baseUrl = 'http://localhost:8010/';
+  baseUrl = 'https://every-birds-fix.loca.lt/';
 
   constructor(private http: HttpClient) { }
 

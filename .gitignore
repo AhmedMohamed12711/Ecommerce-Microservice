@@ -8,7 +8,6 @@ obj/
 *.suo
 *.user
 [Dd]ebug/
-[RRelease/
 [Rr]elease/
 x64/
 x86/
