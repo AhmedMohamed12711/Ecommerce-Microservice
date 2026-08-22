@@ -1,0 +1,7 @@
+{
+  "name": "ecommerce-microservices-root",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd Ecommerce/client && npm install && npm run build"
+  }
+}

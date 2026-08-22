@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd Ecommerce/client && npm install && npm run build",
+  "outputDirectory": "Ecommerce/client/dist/client/browser",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
