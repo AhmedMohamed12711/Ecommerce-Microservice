@@ -8,7 +8,7 @@ import { StoreParam } from '../shared/models/storeParams';
   providedIn: 'root',
 })
 export class StoreService {
-  baseUrl:string="https://every-birds-fix.loca.lt/";
+  baseUrl:string="https://cute-adults-act.loca.lt/api/v1/";
   constructor(private http: HttpClient) {}
 
   getAllProducts(storeParam: StoreParam) {
