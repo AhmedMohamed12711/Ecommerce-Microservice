@@ -1,0 +1,47 @@
+<section class="container my-5 animate-fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-uppercase">
+      <i class="fa fa-receipt text-primary me-2"></i>My Orders History
+    </h3>
+    <a routerLink="/store" class="btn btn-outline-primary rounded-pill">
+      <i class="fa fa-shopping-bag me-2"></i>Continue Shopping
+    </a>
+  </div>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading orders...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && orders.length === 0" class="glass-card p-5 text-center">
+    <i class="fa fa-box-open fa-4x text-muted mb-3"></i>
+    <h4 class="fw-bold">No Orders Found</h4>
+    <p class="text-muted">You haven't placed any orders yet. Start shopping now!</p>
+    <a routerLink="/store" class="btn btn-primary rounded-pill px-4 mt-2">
+      Browse Products
+    </a>
+  </div>
+
+  <div *ngIf="!loading && orders.length > 0" class="row g-4">
+    <div *ngFor="let order of orders" class="col-md-6 col-lg-4">
+      <div class="card glass-card h-100 border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+          <span class="badge bg-primary rounded-pill px-3 py-2">Order #{{ order.id }}</span>
+          <span class="badge bg-success rounded-pill px-2 py-1">Completed</span>
+        </div>
+        <div class="card-body px-3">
+          <h5 class="fw-bold text-success mb-3">${{ order.totalPrice ? order.totalPrice.toFixed(2) : '0.00' }}</h5>
+          <p class="mb-1 text-muted small"><i class="fa fa-user me-2"></i>{{ order.firstName }} {{ order.lastName }}</p>
+          <p class="mb-1 text-muted small"><i class="fa fa-envelope me-2"></i>{{ order.emailAddress || 'N/A' }}</p>
+          <p class="mb-1 text-muted small"><i class="fa fa-map-marker me-2"></i>{{ order.addressLine }}, {{ order.country }}</p>
+        </div>
+        <div class="card-footer bg-white border-0 pb-3 px-3">
+          <button class="btn btn-sm btn-outline-primary w-100 rounded-pill">
+            <i class="fa fa-info-circle me-1"></i>View Details
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

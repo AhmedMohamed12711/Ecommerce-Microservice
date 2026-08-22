@@ -1,0 +1,245 @@
+services:
+  reverseproxy:
+    container_name: nginxgateway
+    restart: always
+    build:
+      context: .
+      dockerfile: APIGateway/nginx/nginx.Dockerfile
+    depends_on:
+      - identityserver
+      - catalog.api
+      - basket.api
+      - discount.api
+      - ordering.api
+    ports:
+      - "44344:443"  
+  catalog.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    build:
+      context: .
+      dockerfile: services/catalog/Catalog.API/Dockerfile
+    ports:
+    - "8000:8000"
+    depends_on:
+      CatalogDb:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+    extra_hosts:
+       - "host.docker.internal:host-gateway"
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:8000
+    - DatabaseSetting__ConnectionString=mongodb://CatalogDb:27017?readPreference=primary&ssl=false
+    - DatabaseSetting__DatabaseName=CatalogDb
+    - DatabaseSetting__BrandsCollection=Brands
+    - DatabaseSetting__TypesCollection=Types
+    - DatabaseSetting__ProductsCollection=Products
+    - ElasticConfiguration__Uri=http://elasticsearch:9200
+    - Auth__Authority=http://localhost:9011
+    - Auth__RequireHttpsMetadata=false
+    - Auth__Audience=Catalog 
+
+  CatalogDb:
+    image: mongo
+    container_name: CatalogDb
+    ports:
+    - "27017:27017"
+    volumes:
+    - catalogdata:/data/db
+
+  basketdb:
+    image: redis:alpine
+    container_name: basketdb
+    restart: always
+    ports:
+    - "6379:6379"
+
+  discountdb:
+    image: postgres:16
+    container_name: discountdb
+    environment:
+    - POSTGRES_USER=admin
+    - POSTGRES_PASSWORD=Password@1
+    - POSTGRES_DB=DiscountDb
+    restart: always
+    ports:
+    - "5432:5432"
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d DiscountDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  orderdb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: orderdb
+    environment:
+    - ACCEPT_EULA=Y
+    - MSSQL_SA_PASSWORD=P@ssw0rd123
+    restart: always
+    ports:
+    - "1433:1433"
+    volumes:
+    - orderdb-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd123' -Q 'SELECT 1' -C"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: elasticsearch
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q 'yellow\\|green'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.3
+    container_name: kibana
+    environment:
+      - "ELASTICSEARCH_URL=http://elasticsearch:9200"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "5601:5601"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    restart: always
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+    - PGADMIN_DEFAULT_EMAIL=admin@ecommerce.com
+    - PGADMIN_DEFAULT_PASSWORD=Password@1
+    restart: always
+    ports:
+    - "5050:80"
+    volumes:
+    - pgadmin_data:/root/.pgadmin
+
+  basket.api:
+    image: ${DOCKER_REGISTRY-}basketapi
+    build:
+      context: .
+      dockerfile: services/basket/Basket.API/Dockerfile
+    ports:
+    - "8003:8001"
+    depends_on:
+    - basketdb
+    - rabbitmq
+    extra_hosts:
+       - "host.docker.internal:host-gateway"
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:8001
+    - CachSettings__ConnectionString=basketdb:6379
+    - GrpcSettings__DiscountUrl=http://discount.api:8080
+    - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
+    - ElasticConfiguration__Uri=http://elasticsearch:9200
+    - Auth__Authority=http://localhost:9011
+    - Auth__RequireHttpsMetadata=false
+
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    ports:
+    - 9000:9000
+    - 9443:9443
+    volumes:
+    - portainer_data:/data
+    - /var/run/docker.sock:/var/run/docker.sock
+
+  discount.api:
+    image: ${DOCKER_REGISTRY-}discountapi
+    build:
+      context: .
+      dockerfile: services/Discount/Discount.API/Dockerfile
+    container_name: discount.api
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:8080
+    - DatabaseSettings__ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=Password@1;
+    - ElasticConfiguration__Uri=http://elasticsearch:9200
+    depends_on:
+      discountdb:
+        condition: service_healthy
+    ports:
+    - "8002:8080"
+
+  ordering.api:
+    image: ${DOCKER_REGISTRY-}orderingapi
+    build:
+      context: .
+      dockerfile: services/Ordering/Ordering.API/Dockerfile
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:8080
+    - ConnectionStrings__OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=sa;Password=P@ssw0rd123;TrustServerCertificate=true
+    - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
+    - ElasticConfiguration__Uri=http://elasticsearch:9200
+    depends_on:
+      orderdb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    ports:
+    - "8004:8080"
+
+  ocelot.apigateway:
+    image: ${DOCKER_REGISTRY-}ocelotapigateway
+    build:
+      context: .
+      dockerfile: APIGateway/Ocelot.APIGateway/Dockerfile
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+        - identityserver
+        - catalog.api
+        - basket.api
+        - discount.api
+        - ordering.api
+    ports:
+        - "8010:8080" 
+  identityserver:
+    image: ${DOCKER_REGISTRY-}eshopidentity
+    container_name: identityserver
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://+:9011
+    build:
+      context: .
+      dockerfile: Infrastructure/eShop.Identity/Dockerfile
+    ports:
+        - "9011:9011" 
+volumes:
+  catalogdata:
+  portainer_data:
+  postgres_data:
+  pgadmin_data:
+  orderdb-data:
+  elasticsearch-data:
+

@@ -1,0 +1,71 @@
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand navbar-brand-logo d-flex align-items-center" routerLink="/">
+            <i class="fa fa-shopping-bag text-primary me-2 animate-float"></i>StepsShop
+        </a>
+    
+        <button
+            class="navbar-toggler border-0 text-white"
+            type="button"
+            (click)="isCollapsed = !isCollapsed"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    
+        <div class="collapse navbar-collapse" [collapse]="isCollapsed">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom" [routerLinkActiveOptions]="{exact:true}" routerLinkActive="active" routerLink="/">
+                        <i class="fa fa-home me-1"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom" routerLinkActive="active" routerLink="/store">
+                        <i class="fa fa-store me-1"></i> Products
+                    </a>
+                </li>
+                <li class="nav-item" *ngIf="isUserAuthenticated">
+                    <a class="nav-link nav-link-custom" routerLinkActive="active" routerLink="/orders">
+                        <i class="fa fa-receipt me-1"></i> My Orders
+                    </a>
+                </li>
+            </ul>
+    
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2" *ngIf="!isUserAuthenticated">
+                    <button class="btn btn-outline-light rounded-pill px-4 btn-sm" (click)="login()">
+                        <i class="fa fa-sign-in me-2"></i> Login
+                    </button>
+                </li>
+                <li class="nav-item me-2" *ngIf="isUserAuthenticated">
+                    <button class="btn btn-outline-danger rounded-pill px-4 btn-sm" (click)="logout()">
+                        <i class="fa fa-sign-out me-2"></i> Logout
+                    </button>
+                </li>
+        
+                <!-- Wishlist -->
+                <li class="nav-item ms-2">
+                    <a class="btn btn-outline-light rounded-pill px-3 py-1 text-white d-flex align-items-center gap-2 cursor-pointer" routerLink="/wishlist">
+                        <i class="fa fa-heart text-danger"></i>
+                        <span class="fw-bold">Wishlist</span>
+                        <span class="badge bg-danger rounded-circle"*ngIf="(wishlistService.wishlist$ | async) as items">
+                            {{ items.length }}
+                        </span>
+                    </a>
+                </li>
+
+                <!-- Cart -->
+                <li class="nav-item ms-2">
+                    <a class="btn btn-primary rounded-pill px-3 py-1 text-white d-flex align-items-center gap-2 cursor-pointer" routerLink="/basket">
+                        <i class="fa fa-shopping-cart"></i>
+                        <span class="fw-bold">Cart</span>
+                        <span class="badge bg-danger rounded-circle badge-pulse"*ngIf="basketservice.basketSource$|async as basket">
+                            {{getBasketCount(basket.items)}}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+    

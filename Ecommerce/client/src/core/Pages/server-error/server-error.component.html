@@ -1,0 +1,52 @@
+<!-- server-error.component.html -->
+<div class="container py-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Header card -->
+            <div class="card shadow-lg border-0 rounded-4 mb-4">
+                <div class="card-body p-4 p-md-5 text-center">
+                    <div class="mb-3 text-danger">
+                        <i class="fa fa-exclamation-triangle fa-4x opacity-75"></i>
+                    </div>
+
+                    <h1 class="h3 fw-bold mb-2">500 - Internal Server Error</h1>
+                    <p class="text-muted mb-4 fs-6">
+                        We hit an unexpected error while processing your request. Please try again in a moment.
+                    </p>
+
+                    <!-- Details if available -->
+                    <div *ngIf="error" class="text-start bg-light p-3 rounded-3 mb-4 border">
+                        <h6 class="fw-bold text-danger mb-2">
+                            <i class="fa fa-bug me-2"></i>Error Details:
+                        </h6>
+                        <p class="font-monospace text-dark mb-1 small">{{ error.message || error }}</p>
+                        <div *ngIf="error.details" class="mt-2">
+                            <h6 class="fw-semibold text-secondary small mb-1">Stack Trace:</h6>
+                            <pre class="bg-dark text-light p-3 rounded small overflow-auto" style="max-height: 200px;"><code>{{ error.details }}</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                        <a routerLink="/store" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                            <i class="fa fa-shopping-bag me-2"></i>Back to Store
+                        </a>
+                        <a routerLink="/" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                            <i class="fa fa-home me-2"></i>Go Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Alert -->
+            <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-3 rounded-3" role="alert">
+                <i class="fa fa-info-circle fa-lg text-warning"></i>
+                <div class="small">
+                    If the issue persists, please try refreshing the page or contact our support team.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
