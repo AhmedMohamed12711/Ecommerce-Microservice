@@ -10,6 +10,7 @@ import { StoreModule } from '../store/store.module';
 import { HomeModule } from '../home/home.module';
 import { errorInterceptor } from '../core/interceptors/error.interceptor';
 import { loadingInterceptor } from '../core/interceptors/loading.interceptor';
+import { tunnelInterceptor } from '../core/interceptors/tunnel.interceptor';
 import { SigninRedirectCallbackComponent } from '../account/signin-redirect-callback/signin-redirect-callback.component';
 import { SignoutRedirectCallbackComponent } from '../account/signout-redirect-callback/signout-redirect-callback.component';
 
@@ -29,7 +30,7 @@ import { SignoutRedirectCallbackComponent } from '../account/signout-redirect-ca
     HomeModule
   ],
   providers: [
-    provideHttpClient(withInterceptors([errorInterceptor,loadingInterceptor]))
+    provideHttpClient(withInterceptors([tunnelInterceptor, errorInterceptor, loadingInterceptor]))
   ],
   bootstrap: [AppComponent]
 })
