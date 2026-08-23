@@ -3,6 +3,8 @@ using eShop.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Serilog;
 
+using Microsoft.AspNetCore.HttpOverrides;
+
 namespace eShop.Identity;
 
 internal static class HostingExtensions
@@ -10,6 +12,13 @@ internal static class HostingExtensions
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddRazorPages();
+
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
 
         builder.Services.AddCors(options =>
         {
@@ -77,6 +86,7 @@ internal static class HostingExtensions
     
     public static WebApplication ConfigurePipeline(this WebApplication app)
     { 
+        app.UseForwardedHeaders();
         app.UseSerilogRequestLogging();
     
         if (app.Environment.IsDevelopment())
