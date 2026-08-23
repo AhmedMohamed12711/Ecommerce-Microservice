@@ -15,7 +15,7 @@ internal static class HostingExtensions
         {
             options.AddPolicy("AllowAngular", policy =>
             {
-                policy.WithOrigins("http://localhost:4200")
+                policy.SetIsOriginAllowed(_ => true)
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();
@@ -29,7 +29,7 @@ internal static class HostingExtensions
                 options.Events.RaiseFailureEvents = true;
                 options.KeyManagement.Enabled = false;
                 options.Events.RaiseSuccessEvents = true;
-                options.IssuerUri = "http://localhost:9011";
+                options.IssuerUri = "https://tired-queens-battle.loca.lt";
                 // see https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/
                 options.EmitStaticAudienceClaim = true;
                 options.Authentication.CookieSameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
