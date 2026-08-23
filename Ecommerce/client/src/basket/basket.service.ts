@@ -11,7 +11,7 @@ import { ToastService } from '../core/services/toast.service';
   providedIn: 'root'
 })
 export class BasketService {
-  baseUrl:string="https://forty-islands-flow.loca.lt/"
+  baseUrl:string="http://localhost:8010/"
   private basketSource=new BehaviorSubject<Basket|null>(null)
   basketSource$=this.basketSource.asObservable()
 

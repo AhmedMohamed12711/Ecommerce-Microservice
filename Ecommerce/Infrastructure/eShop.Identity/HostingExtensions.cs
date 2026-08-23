@@ -3,8 +3,6 @@ using eShop.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Serilog;
 
-using Microsoft.AspNetCore.HttpOverrides;
-
 namespace eShop.Identity;
 
 internal static class HostingExtensions
@@ -13,18 +11,11 @@ internal static class HostingExtensions
     {
         builder.Services.AddRazorPages();
 
-        builder.Services.Configure<ForwardedHeadersOptions>(options =>
-        {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-            options.KnownNetworks.Clear();
-            options.KnownProxies.Clear();
-        });
-
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAngular", policy =>
             {
-                policy.SetIsOriginAllowed(_ => true)
+                policy.WithOrigins("http://localhost:4200")
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();
@@ -38,13 +29,13 @@ internal static class HostingExtensions
                 options.Events.RaiseFailureEvents = true;
                 options.KeyManagement.Enabled = false;
                 options.Events.RaiseSuccessEvents = true;
-                options.IssuerUri = "https://tired-queens-battle.loca.lt";
+                options.IssuerUri = "http://localhost:9011";
                 // see https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/
                 options.EmitStaticAudienceClaim = true;
                 options.Authentication.CookieSameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
                 options.Authentication.CheckSessionCookieSameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
             })
-            .AddTestUsers(TestUsers.Users).AddDeveloperSigningCredential(persistKey:true,filename:"tempkey.jwk");
+            .AddTestUsers(TestUsers.Users).AddDeveloperSigningCredential(persistKey: true, filename: "tempkey.jwk");
 
         // in-memory, code config
         isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
@@ -52,22 +43,8 @@ internal static class HostingExtensions
         isBuilder.AddInMemoryApiResources(Config.ApiResource);
         isBuilder.AddInMemoryClients(Config.Clients);
 
-
         builder.Services.AddControllersWithViews();
         builder.Services.AddRazorPages();
-
-        // if you want to use server-side sessions: https://blog.duendesoftware.com/posts/20220406_session_management/
-        // then enable it
-        //isBuilder.AddServerSideSessions();
-        //
-        // and put some authorization on the admin/management pages
-        //builder.Services.AddAuthorization(options =>
-        //       options.AddPolicy("admin",
-        //           policy => policy.RequireClaim("sub", "1"))
-        //   );
-        //builder.Services.Configure<RazorPagesOptions>(options =>
-        //    options.Conventions.AuthorizeFolder("/ServerSideSessions", "admin"));
-
 
         builder.Services.AddAuthentication()
             .AddGoogle(options =>
@@ -83,12 +60,11 @@ internal static class HostingExtensions
 
         return builder.Build();
     }
-    
+
     public static WebApplication ConfigurePipeline(this WebApplication app)
-    { 
-        app.UseForwardedHeaders();
+    {
         app.UseSerilogRequestLogging();
-    
+
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -99,7 +75,7 @@ internal static class HostingExtensions
         app.UseCors("AllowAngular");
         app.UseIdentityServer();
         app.UseAuthorization();
-        
+
         app.MapDefaultControllerRoute();
         app.MapRazorPages();
 

@@ -8,7 +8,7 @@ import { StoreParam } from '../shared/models/storeParams';
   providedIn: 'root',
 })
 export class StoreService {
-  baseUrl:string="https://forty-islands-flow.loca.lt/";
+  baseUrl:string="http://localhost:8010/";
   constructor(private http: HttpClient) {}
 
   getAllProducts(storeParam: StoreParam) {

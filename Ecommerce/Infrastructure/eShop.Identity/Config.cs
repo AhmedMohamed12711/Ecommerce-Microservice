@@ -77,21 +77,13 @@ public static class Config
                     RequireClientSecret = false,            // SPA
                     RedirectUris = {
                         "http://localhost:4200/signin-callback",
-                        "http://localhost:4200/assets/silent-callback.html",
-                        "https://ecommerce-microservice-fawn.vercel.app/signin-callback",
-                        "https://ecommerce-microservice-fawn.vercel.app/assets/silent-callback.html",
-                        "https://client-seven-lac-37.vercel.app/signin-callback",
-                        "https://client-seven-lac-37.vercel.app/assets/silent-callback.html"
+                        "http://localhost:4200/assets/silent-callback.html"
                     },
                     PostLogoutRedirectUris = {
-                        "http://localhost:4200/signout-callback",
-                        "https://ecommerce-microservice-fawn.vercel.app/signout-callback",
-                        "https://client-seven-lac-37.vercel.app/signout-callback"
+                        "http://localhost:4200/signout-callback"
                     },
                     AllowedCorsOrigins = {
-                        "http://localhost:4200",
-                        "https://ecommerce-microservice-fawn.vercel.app",
-                        "https://client-seven-lac-37.vercel.app"
+                        "http://localhost:4200"
                     },
                     AllowedScopes = {
                         IdentityServerConstants.StandardScopes.OpenId,
